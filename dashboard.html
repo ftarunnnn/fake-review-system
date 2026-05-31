@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake Review System - Prototype Dashboard</title>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-700: #374151;
+            --gray-900: #111827;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            min-height: 100vh;
+            color: var(--gray-900);
+        }
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            margin: 0 0 0.5rem 0;
+            color: var(--primary-dark);
+        }
+        .header p {
+            margin: 0;
+            color: var(--gray-700);
+        }
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        .tab-btn:hover:not(.active) {
+            background: var(--gray-100);
+        }
+        .phase-section {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .phase-section.active { display: block; }
+        .phase-section h2 {
+            margin-top: 0;
+            color: var(--primary-dark);
+            border-bottom: 2px solid var(--gray-100);
+            padding-bottom: 0.5rem;
+        }
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .control-group label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        .control-group input, .control-group select {
+            padding: 0.5rem;
+            border: 1px solid var(--gray-200);
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .stat-card {
+            background: var(--gray-50);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-dark);
+        }
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--gray-700);
+        }
+        .review-card {
+            background: var(--gray-50);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary);
+        }
+        .review-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 1rem;
+        }
+        .stars {
+            color: #fbbf24;
+            font-size: 1.2rem;
+        }
+        .review-text {
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        .photos-grid {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+        .review-photo {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid var(--gray-200);
+        }
+        .meta-data {
+            font-size: 0.85rem;
+            color: var(--gray-700);
+            margin-top: 1rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--gray-200);
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            display: none;
+            z-index: 1000;
+        }
+        .notification.show { display: block; }
+        .log-output {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+        .quick-start {
+            background: var(--gray-50);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        .quick-start ol {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="notification" id="notification">Action completed successfully!</div>
+    
+    <div class="app-container">
+        <div class="header">
+            <h1>🛠️ Fake Review System - Prototype Dashboard</h1>
+            <p>User-friendly localhost interface for testing and development</p>
+            <div class="quick-start">
+                <strong>Quick Start:</strong>
+                <ol>
+                    <li>Click "Phase 1" to generate mock reviews</li>
+                    <li>Click "Phase 2" to view and filter reviews</li>
+                    <li>Click "Phase 3" to add custom reviews</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showPhase(1)">Phase 1: Generate Reviews</button>
+            <button class="tab-btn" onclick="showPhase(2)">Phase 2: View & Filter Reviews</button>
+            <button class="tab-btn" onclick="showPhase(3)">Phase 3: Add Custom Review</button>
+        </div>
+
+        <div id="phase1" class="phase-section active">
+            <h2>📊 Generate Mock Reviews</h2>
+            <div class="controls-grid">
+                <div class="control-group">
+                    <label for="count">Number of Reviews to Generate</label>
+                    <input type="number" id="count" value="15" min="1" max="100">
+                </div>
+                <div class="control-group">
+                    <label for="minRating">Minimum Rating (1-5)</label>
+                    <select id="minRating">
+                        <option value="1">1 Star</option>
+                        <option value="2">2 Stars</option>
+                        <option value="3" selected>3 Stars</option>
+                        <option value="4">4 Stars</option>
+                        <option value="5">5 Stars</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="maxRating">Maximum Rating (1-5)</label>
+                    <select id="maxRating">
+                        <option value="1">1 Star</option>
+                        <option value="2">2 Stars</option>
+                        <option value="3">3 Stars</option>
+                        <option value="4" selected>4 Stars</option>
+                        <option value="5">5 Stars</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="generateReviews()">Generate Reviews</button>
+            <button class="btn btn-danger" onclick="resetDatabase()" style="margin-left: 0.5rem;">Reset Database</button>
+            <div class="log-output" id="log1"></div>
+        </div>
+
+        <div id="phase2" class="phase-section">
+            <h2>📋 View & Filter Reviews</h2>
+            <div class="controls-grid">
+                <div class="control-group">
+                    <label for="filterRating">Filter by Rating</label>
+                    <select id="filterRating" onchange="filterReviews()">
+                        <option value="">All Ratings</option>
+                        <option value="5">5 Stars</option>
+                        <option value="4">4 Stars</option>
+                        <option value="3">3 Stars</option>
+                        <option value="2">2 Stars</option>
+                        <option value="1">1 Star</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="searchText">Search in Reviews</label>
+                    <input type="text" id="searchText" placeholder="Enter keywords..." onkeyup="searchReviews()">
+                </div>
+                <div class="control-group">
+                    <label for="limit">Items per Page</label>
+                    <select id="limit" onchange="changeLimit()">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn btn-success" onclick="fetchReviews()">Refresh Reviews</button>
+            <div class="stats-grid" id="stats"></div>
+            <div id="reviews-container"></div>
+        </div>
+
+        <div id="phase3" class="phase-section">
+            <h2>✍️ Add Custom Review</h2>
+            <form id="addReviewForm">
+                <div class="controls-grid">
+                    <div class="control-group">
+                        <label for="username">Username *</label>
+                        <input type="text" id="username" required placeholder="John Doe">
+                    </div>
+                    <div class="control-group">
+                        <label for="rating">Rating *</label>
+                        <select id="rating" required>
+                            <option value="">Select rating</option>
+                            <option value="5">★★★★★ (5 Stars)</option>
+                            <option value="4">★★★★☆ (4 Stars)</option>
+                            <option value="3">★★★☆☆ (3 Stars)</option>
+                            <option value="2">★★☆☆☆ (2 Stars)</option>
+                            <option value="1">★☆☆☆☆ (1 Star)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label for="reviewText">Review Text *</label>
+                    <textarea id="reviewText" rows="4" required placeholder="Write your review here..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-success" style="margin-top: 1rem;">Submit Review</button>
+            </form>
+            <div class="log-output" id="log3"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+
+        function showPhase(phaseNum) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.phase-section').forEach(section => section.classList.remove('active'));
+            document.querySelectorAll('.tab-btn')[phaseNum - 1].classList.add('active');
+            document.getElementById(`phase${phaseNum}`).classList.add('active');
+            if (phaseNum === 2) fetchReviews();
+        }
+
+        function showNotification(msg) {
+            const notif = document.getElementById('notification');
+            notif.textContent = msg;
+            notif.classList.add('show');
+            setTimeout(() => notif.classList.remove('show'), 3000);
+        }
+
+        async function generateReviews() {
+            const count = document.getElementById('count').value;
+            const minRating = document.getElementById('minRating').value;
+            const maxRating = document.getElementById('maxRating').value;
+            const log = document.getElementById('log1');
+            
+            log.textContent = 'Generating reviews...';
+            try {
+                const response = await fetch(`${API_BASE}/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ count, minRating, maxRating })
+                });
+                const data = await response.json();
+                log.textContent = `✓ Generated ${data.count} reviews successfully`;
+                showNotification('Reviews generated!');
+            } catch (error) {
+                log.textContent = '✗ Error: Make sure server.js is running on port 3000';
+            }
+        }
+
+        async function resetDatabase() {
+            if (!confirm('Reset the database? This will remove all current reviews.')) return;
+            try {
+                await fetch(`${API_BASE}/reset`, { method: 'POST' });
+                showNotification('Database reset complete');
+                fetchReviews();
+            } catch (error) {
+                showNotification('Error resetting database');
+            }
+        }
+
+        async function fetchReviews() {
+            const container = document.getElementById('reviews-container');
+            container.innerHTML = '<p>Loading reviews...</p>';
+            
+            try {
+                const limit = document.getElementById('limit').value;
+                const response = await fetch(`${API_BASE}/reviews?limit=${limit}`);
+                const data = await response.json();
+                
+                renderReviews(data.reviews);
+                renderStats(data.metadata);
+            } catch (error) {
+                container.innerHTML = '<p style="color: var(--danger);">Error: Server not running on port 3000</p>';
+            }
+        }
+
+        function renderReviews(reviews) {
+            const container = document.getElementById('reviews-container');
+            container.innerHTML = reviews.map(review => `
+                <div class="review-card">
+                    <div class="review-header">
+                        <img src="${review.avatarUrl}" class="avatar" alt="${review.username}'s avatar">
+                        <div>
+                            <strong>${review.username}</strong>
+                            <div class="stars">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>
+                        </div>
+                    </div>
+                    <div class="review-text">${review.reviewText}</div>
+                    ${review.photos.length ? `<div class="photos-grid">${review.photos.map(p => `<img src="${p}" class="review-photo">`).join('')}</div>` : ''}
+                    <div class="meta-data">Reviewed on ${new Date(review.createdAt).toLocaleDateString()}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderStats(metadata) {
+            document.getElementById('stats').innerHTML = `
+                <div class="stat-card"><div class="stat-value">${metadata.totalItems}</div><div class="stat-label">Total Reviews</div></div>
+                <div class="stat-card"><div class="stat-value" id="avgRating">--</div><div class="stat-label">Average Rating</div></div>
+                <div class="stat-card"><div class="stat-value">${metadata.itemsPerPage}</div><div class="stat-label">Per Page</div></div>
+            `;
+        }
+
+        document.getElementById('addReviewForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const log = document.getElementById('log3');
+            log.textContent = 'Submitting review...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/reviews`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: document.getElementById('username').value,
+                        rating: document.getElementById('rating').value,
+                        reviewText: document.getElementById('reviewText').value
+                    })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    log.textContent = '✓ Review added successfully!';
+                    showNotification('Review submitted!');
+                    e.target.reset();
+                }
+            } catch (error) {
+                log.textContent = '✗ Error submitting review';
+            }
+        });
+
+        fetchReviews();
+    </script>
+</body>
+</html>
