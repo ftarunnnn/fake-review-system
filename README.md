@@ -55,7 +55,21 @@ npm install
 npm start
 ```
 
-The server starts on **http://localhost:3000**.
+The server starts on **Enhanced fake review system with user-friendly localhost dashboard. Created `dashboard.html` with 3 phases:
+
+**Phase 1: Generate Reviews** - Set count and rating range for mock data generation
+
+**Phase 2: View & Filter Reviews** - Browse, search, and filter reviews with stats
+
+**Phase 3: Add Custom Reviews** - Submit manual reviews via form
+
+To run:
+```bash
+npm install
+npm start
+```
+
+Then open `http://localhost:3000/dashboard.html` in your browser.**.
 
 | URL | Description |
 |-----|-------------|
